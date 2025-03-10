@@ -17,9 +17,10 @@ namespace ValidationTool
                 Console.WriteLine("\nSelect validation type:");
                 Console.WriteLine("1. Email (Single)");
                 Console.WriteLine("2. Phone Number (Single)");
-                Console.WriteLine("3. Bulk Validation (Email & Phone)");
-                Console.WriteLine("4. Exit");
-                Console.Write("Enter your choice (1-4): ");
+                Console.WriteLine("3. Full Name (Single)");
+                Console.WriteLine("4. Bulk Validation (Email & Phone)");
+                Console.WriteLine("5. Exit");
+                Console.Write("Enter your choice (1-5): ");
                 string choice = Console.ReadLine() ?? string.Empty;
                 switch (choice)
                 {
@@ -30,9 +31,12 @@ namespace ValidationTool
                         await ValidatePhoneInput();
                         break;
                     case "3":
-                        await BulkValidateContacts();
+                        await ValidateNameInput();
                         break;
                     case "4":
+                        await BulkValidateContacts();
+                        break;
+                    case "5":
                         Console.WriteLine("\nThank you for using the Validation Tool.");
                         return;
                     default:
@@ -42,7 +46,18 @@ namespace ValidationTool
             }
         }
 
-        private static async Task ValidateEmailInput()
+        private static async Task ValidateNameInput()
+        {
+            Console.Write("\nEnter full name to validate (first name and surname): ");
+            string fullName = Console.ReadLine() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(fullName))
+                return;
+            var validator = new NameValidator();
+            bool isValid = await validator.ValidateNameAsync(fullName);
+            UIHelper.DisplaySingleValidationResult(isValid, validator.ValidationResults);
+        }
+
+        private static async Task ValidateEmailInput()3
         {
             Console.Write("\nEnter email address to validate: ");
             string email = Console.ReadLine() ?? string.Empty;
