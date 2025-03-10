@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace EmailValidationApp
+namespace ValidationTool
 {
     public class PhoneValidator
     {
@@ -13,18 +13,21 @@ namespace EmailValidationApp
         {
             ValidationResults.Clear();
 
+            // Format the phone number (remove spaces and other formatting characters)
+            string formattedNumber = FormatPhoneNumber(phoneNumber);
+
             // Basic format validation
-            bool formatValid = ValidateFormat(phoneNumber);
+            bool formatValid = ValidateFormat(formattedNumber);
             ValidationResults.Add("Basic Format", formatValid);
             if (!formatValid)
                 return Task.FromResult(false);
 
             // Check if it's a valid South African number
-            bool isValidSANumber = ValidateSouthAfricanNumber(phoneNumber);
+            bool isValidSANumber = ValidateSouthAfricanNumber(formattedNumber);
             ValidationResults.Add("Valid South African Number", isValidSANumber);
 
             // Check number length
-            bool properLength = ValidateLength(phoneNumber);
+            bool properLength = ValidateLength(formattedNumber);
             ValidationResults.Add("Proper Length", properLength);
 
             // Overall validation
@@ -63,6 +66,21 @@ namespace EmailValidationApp
                 return "0" + phoneNumber.Substring(3);
             }
             return phoneNumber;
+        }
+
+        private string FormatPhoneNumber(string phoneNumber)
+        {
+            // Clean the input of spaces, dashes, parentheses and other formatting characters
+            string cleaned = System.Text.RegularExpressions.Regex.Replace(phoneNumber, @"[\s\-\(\)\.]", "");
+
+            // Special case: if the user entered the country code without +, fix it
+            // First check if it starts with "27" followed by a digit
+            if (System.Text.RegularExpressions.Regex.IsMatch(cleaned, @"^27\d"))
+            {
+                return "+" + cleaned;
+            }
+
+            return cleaned;
         }
     }
 }
