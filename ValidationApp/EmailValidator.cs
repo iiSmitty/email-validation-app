@@ -66,6 +66,13 @@ public class EmailValidator
     private bool HasExcessiveRandomization(string email)
     {
         string localPart = email.Split('@')[0];
+        string domain = email.Split('@')[1].ToLower();
+
+        // Special case for Facebook-generated emails
+        if (domain == "facebook.com" && localPart.All(char.IsDigit))
+        {
+            return false;
+        }
 
         // Count digits and special characters
         int digits = localPart.Count(char.IsDigit);
@@ -75,7 +82,9 @@ public class EmailValidator
         double ratio = (double)(digits + special) / localPart.Length;
 
         // Check for long sequences of random-looking characters
-        bool hasRandomPattern = Regex.IsMatch(localPart, @"[a-zA-Z0-9]{10,}");
+        // But exempt known patterns from legitimate services
+        bool hasRandomPattern = Regex.IsMatch(localPart, @"[a-zA-Z0-9]{10,}") &&
+                                !domain.Equals("facebook.com");
 
         return ratio > 0.5 || hasRandomPattern;
     }
